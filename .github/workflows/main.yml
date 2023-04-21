@@ -117,11 +117,11 @@ jobs:
         working-directory: terraform
 
       - name: Terraform Validate
-        run: terraform validate --no-color
+        run: terraform validate -no-color
         working-directory: terraform
 
       - name: Terraform Plan
-        run: terraform plan --no-color
+        run: terraform plan -no-color
         continue-on-error: true
         working-directory: terraform
 
