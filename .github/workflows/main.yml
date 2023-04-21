@@ -3,6 +3,9 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
+  # pull_request:
+  #   branches:
+  #     - main
 
 jobs:
   continuous-integration:
@@ -84,15 +87,32 @@ jobs:
           name: api
 
       - name: Upload to S3
-        run: aws s3 cp api.zip s3://<YOUR_S3_BUCKET_NAME>/api.zip
+        run: aws s3 cp api.zip s3://crommie-s3/api.zip
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - name: Deploy new Lambda
-        run: aws lambda update-function-code --function-name <YOUR_LAMBDA_FUNCTION_NAME> --s3-bucket <YOUR_S3_BUCKET_NAME> --s3-key api.zip
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Terraform Init
+        run: terraform init terraform/
+
+      - name: Terraform Validate
+        run: terraform validate --no-color terraform/
+
+      - name: Terraform Plan
+        run: terraform plan --no-color terraform/
+        continue-on-error: true
+
+      - name: Terraform Apply && Deploy Lambda
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve terraform/
