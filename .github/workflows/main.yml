@@ -98,13 +98,6 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
-      - name: print dir
-        run: ls -la
-      - name: print pwd
-        run: pwd
-      - name: print pwd
-        run: ls -la ../
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
