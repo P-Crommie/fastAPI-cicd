@@ -93,9 +93,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - name: change dir to terraform
-        run: cd terraform/
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
@@ -108,14 +105,18 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ./terraform
 
       - name: Terraform Validate
         run: terraform validate --no-color
+        working-directory: ./terraform
 
       - name: Terraform Plan
         run: terraform plan --no-color
         continue-on-error: true
+        working-directory: ./terraform
 
       - name: Terraform Apply && Deploy Lambda
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
+        working-directory: ./terraform
