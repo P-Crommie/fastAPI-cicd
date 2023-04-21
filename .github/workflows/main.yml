@@ -98,6 +98,8 @@ jobs:
 
       - name: print dir
         run: ls -la
+      - name: print pwd
+        run: pwd
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
