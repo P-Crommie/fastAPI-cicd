@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ACTIONS_STEP_DEBUG: true
+      ACTIONS_RUNNER_DEBUG: true
     outputs:
       tag: ${{steps.tag.outputs.tag}}
 
@@ -75,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: api
-          path: api_$GITHUB_OUTPUT.zip
+          path: api_${{steps.tag.outputs.tag}}.zip
 
       - name: Update lambda version in terraform file
         run: |
@@ -87,7 +88,7 @@ jobs:
     needs: [continuous-integration]
     env:
       ACTIONS_STEP_DEBUG: true
-
+      ACTIONS_RUNNER_DEBUG: true
     # Check if current branch is main
     if: github.ref == 'refs/heads/main'
     steps:
