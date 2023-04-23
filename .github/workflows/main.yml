@@ -78,10 +78,6 @@ jobs:
           name: api
           path: api_${{steps.tag.outputs.tag}}.zip
 
-      - name: Update lambda version in terraform file
-        run: |
-          sed -i "s/api.zip/api_${{steps.tag.outputs.tag}}.zip/g" ./terraform/variables.tf
-
   continuous-deployment:
     runs-on: ubuntu-latest
     # job will only run when the continuous-integration build successfully completes
@@ -92,9 +88,11 @@ jobs:
     # Check if current branch is main
     if: github.ref == 'refs/heads/main'
     steps:
-      # - uses: actions/checkout@v2
-      - run: echo tag ${{needs.continuous-integration.outputs.tag}}
+      - uses: actions/checkout@v2
 
+      - name: Update lambda version in terraform file
+        run: |
+          sed -i "s/api.zip/api_${{needs.continuous-integration.outputs.tag}}.zip/g" ./terraform/variables.tf
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
