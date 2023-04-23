@@ -63,7 +63,7 @@ jobs:
       - name: Add App to Zipfile
         run: |
           zip -g api.zip -r app/*
-          mv api.zip api_$tag.zip
+          mv api.zip api_$GITHUB_OUTPUT.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
         # the next job to retrieve back the artifact file
@@ -71,11 +71,11 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: api
-          path: api_$tag.zip
+          path: api_$GITHUB_OUTPUT.zip
 
       - name: Update lambda version in terraform file
         run: |
-          sed -i "s/api.zip/api_$tag.zip/g" ./terraform/variables.tf
+          sed -i "s/api.zip/api_$GITHUB_OUTPUT.zip/g" ./terraform/variables.tf
 
   continuous-deployment:
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
           name: api
 
       - name: Upload to S3
-        run: aws s3 cp api_$tag.zip s3://crommie-s3/api_$tag.zip
+        run: aws s3 cp api_$GITHUB_OUTPUT.zip s3://crommie-s3/api_$tag.zip
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
