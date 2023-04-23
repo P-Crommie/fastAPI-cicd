@@ -1,4 +1,4 @@
-resource "aws_iam_role" "lambda_exec" {
+resource "aws_iam_role" "this" {
   name = "lambda-exec-role"
 
   assume_role_policy = jsonencode({
@@ -15,7 +15,7 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_exec_s3" {
+resource "aws_iam_role_policy_attachment" "this" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-  role       = aws_iam_role.lambda_exec.name
+  role       = aws_iam_role.this.name
 }

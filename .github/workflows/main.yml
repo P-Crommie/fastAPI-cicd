@@ -12,7 +12,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Clone repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Get Tags
+        id: tag
+        run: |
+          output=$(bash getTags.sh)
+          echo "::set-output name=tag::$output"
 
       - name: Set up Python all python version
         uses: actions/setup-python@v2
@@ -48,13 +57,13 @@ jobs:
 
       # use the highest level of compression to create api.zip archive.
       - name: Create Zipfile archive of Dependencies
-        run: |
-          cd ./venv/lib/python3.7/site-packages
-          zip -r9 ../../../../api.zip .
+        run: zip -r9 api.zip venv/lib/python3.7/site-packages/*
 
       # update api.zip with ./app contents
       - name: Add App to Zipfile
-        run: cd ./app && zip -g ../api.zip -r .
+        run: |
+          zip -g api.zip -r app/*
+          mv api.zip api_$tag.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
         # the next job to retrieve back the artifact file
@@ -62,7 +71,11 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: api
-          path: api.zip
+          path: api_$tag.zip
+
+      - name: Update lambda version in terraform file
+        run: |
+          sed -i "s/api.zip/api_$TAGS.zip/g" ./terraform/variables.tf
 
   continuous-deployment:
     runs-on: ubuntu-latest
@@ -72,7 +85,7 @@ jobs:
     # Check if current branch is main
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v2
+      # - uses: actions/checkout@v2
 
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
@@ -89,7 +102,7 @@ jobs:
           name: api
 
       - name: Upload to S3
-        run: aws s3 cp api.zip s3://crommie-s3/api.zip
+        run: aws s3 cp api_$tag.zip s3://crommie-s3/api_$tag.zip
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -122,3 +135,11 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
         working-directory: terraform
+
+      - name: Clean repo
+        run: git clean -f
+
+      - name: Create and push tag
+        run: |
+          git tag $TAGS || echo "Tag already exists"
+          git push --tags

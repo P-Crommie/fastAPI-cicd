@@ -1,4 +1,4 @@
 data "aws_s3_object" "this" {
-  bucket = "crommie-s3"
-  key    = "api.zip"
+  bucket = var.s3bucket
+  key    = var.s3buckek_key
 }

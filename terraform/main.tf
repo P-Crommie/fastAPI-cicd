@@ -1,10 +1,10 @@
 resource "aws_lambda_function" "this" {
-  function_name    = "crommie-lambda-function"
-  s3_bucket        = "crommie-s3"
-  s3_key           = "api.zip"
-  handler          = "main.handler"
-  role             = aws_iam_role.lambda_exec.arn
-  runtime          = "python3.7"
+  function_name    = var.lambda_name
+  s3_bucket        = var.s3bucket
+  s3_key           = var.s3buckek_key
+  handler          = var.lambda_handler
+  role             = aws_iam_role.this.arn
+  runtime          = var.lambda_runtime
   source_code_hash = data.aws_s3_object.this.etag
 }
 
