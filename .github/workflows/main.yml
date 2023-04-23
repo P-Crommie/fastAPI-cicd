@@ -10,6 +10,8 @@ on:
 jobs:
   continuous-integration:
     runs-on: ubuntu-latest
+    env:
+      ACTION_STEP_DEBUG: true
 
     steps:
       - name: Clone repo
