@@ -21,7 +21,7 @@ jobs:
         id: tag
         run: |
           output=$(bash getTags.sh)
-          echo "::set-output name=tag::$output"
+          echo "tag=$output" >> $GITHUB_OUTPUT
 
       - name: Set up Python all python version
         uses: actions/setup-python@v2
@@ -75,7 +75,7 @@ jobs:
 
       - name: Update lambda version in terraform file
         run: |
-          sed -i "s/api.zip/api_$TAGS.zip/g" ./terraform/variables.tf
+          sed -i "s/api.zip/api_$tag.zip/g" ./terraform/variables.tf
 
   continuous-deployment:
     runs-on: ubuntu-latest
