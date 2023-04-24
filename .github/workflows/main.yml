@@ -63,12 +63,20 @@ jobs:
       # use the highest level of compression to create api.zip archive.
       - name: Create Zipfile archive of Dependencies
         run: |
-          zip run: zip -r9 api.zip venv/lib/python3.7/site-packages/*
+          cd ./venv/lib/python3.7/site-packages
+          zip -r9 ../../../../api.zip .
+          cd ../../../../
+          pwd
+          ls -ls
 
       # update api.zip with ./app contents
       - name: Add App to Zipfile
         run: |
-          zip -g api.zip -r app/*
+          cd ./app
+          zip -g ../api.zip -r .
+          cd ../
+          pwd
+          ls -la
           mv api.zip api-v${{steps.tag.outputs.tag}}.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
@@ -149,7 +157,8 @@ jobs:
         run: git clean -f
 
       - name: Create and push tag
-        uses: tvdias/github-tagger@v0.0.1
-        with:
+        run: |
+          git tag ${{needs.continuous-integration.outputs.tag}} || echo "tag already exists"
+          git push --tags
+        env:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: ${{needs.continuous-integration.outputs.tag}}
