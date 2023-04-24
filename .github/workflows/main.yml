@@ -17,9 +17,9 @@ jobs:
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Get Tags
         id: tag
@@ -68,7 +68,7 @@ jobs:
       - name: Add App to Zipfile
         run: |
           zip -g api.zip -r app/*
-          mv api.zip api_${{steps.tag.outputs.tag}}.zip
+          mv api.zip api-v${{steps.tag.outputs.tag}}.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
         # the next job to retrieve back the artifact file
@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: api
-          path: api_${{steps.tag.outputs.tag}}.zip
+          path: api-v${{steps.tag.outputs.tag}}.zip
 
   continuous-deployment:
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
 
       - name: Update lambda version in terraform file
         run: |
-          sed -i "s/api.zip/api_${{needs.continuous-integration.outputs.tag}}.zip/g" ./terraform/variables.tf
+          sed -i "s/api.zip/api-v${{needs.continuous-integration.outputs.tag}}.zip/g" ./terraform/variables.tf
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
@@ -108,7 +108,7 @@ jobs:
           name: api
 
       - name: Upload to S3
-        run: aws s3 cp api_${{needs.continuous-integration.outputs.tag}}.zip s3://crommie-s3/api_${{needs.continuous-integration.outputs.tag}}.zip
+        run: aws s3 cp api-v${{needs.continuous-integration.outputs.tag}}.zip s3://crommie-s3/api-v${{needs.continuous-integration.outputs.tag}}.zip
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -149,3 +149,6 @@ jobs:
         run: |
           git tag ${{needs.continuous-integration.outputs.tag}} || echo "Tag already exists"
           git push --tags
+        env:
+          REPO_USER: ${{ secrets.REPO_USER }}
+          REPO_ACCESS_KEY: ${{ secrets.REPO_ACCESS_KEY }}
