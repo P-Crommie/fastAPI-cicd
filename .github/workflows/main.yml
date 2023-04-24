@@ -69,8 +69,7 @@ jobs:
       # update api.zip with ./app contents
       - name: Add App to Zipfile
         run: |
-          cd ./app && zip -g ../api.zip -r .
-          mv api.zip api-v${{steps.tag.outputs.tag}}.zip
+          cd ./app && zip -g ../api.zip -r . && mv api.zip api-v${{steps.tag.outputs.tag}}.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
         # the next job to retrieve back the artifact file
