@@ -66,8 +66,6 @@ jobs:
           cd ./venv/lib/python3.7/site-packages
           zip -r9 ../../../../api.zip .
           cd ../../../../
-          pwd
-          ls -ls
 
       # update api.zip with ./app contents
       - name: Add App to Zipfile
@@ -75,8 +73,6 @@ jobs:
           cd ./app
           zip -g ../api.zip -r .
           cd ../
-          pwd
-          ls -la
           mv api.zip api-v${{steps.tag.outputs.tag}}.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
