@@ -63,13 +63,13 @@ jobs:
       # use the highest level of compression to create api.zip archive.
       - name: Create Zipfile archive of Dependencies
         run: |
-          cd ./venv/lib/python3.7/site-packages
-          zip -r9 ../../../../api.zip .
+          zip run: zip -r9 api.zip venv/lib/python3.7/site-packages/*
 
       # update api.zip with ./app contents
       - name: Add App to Zipfile
         run: |
-          cd ./app && zip -g ../api.zip -r . && mv api.zip api-v${{steps.tag.outputs.tag}}.zip
+          zip -g api.zip -r app/*
+          mv api.zip api-v${{steps.tag.outputs.tag}}.zip
 
         # Upload api.zip to GitHub server as an artifact using actions/upload-artifact@v2
         # the next job to retrieve back the artifact file
