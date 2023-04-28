@@ -2,9 +2,11 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
-  # pull_request:
-  #   branches:[ main ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   continuous-integration:
@@ -24,7 +26,7 @@ jobs:
       - name: Get Tags
         id: tag
         run: |
-          tag=$(bash getTags.sh)
+          tag=$(bash .github/scripts/getTags.sh)
           echo "tag $tag"
           echo tag=$tag >> $GITHUB_OUTPUT
 
@@ -99,7 +101,7 @@ jobs:
 
       - name: Update lambda version in terraform file
         run: |
-          sed -i "s/api.zip/api-v${{needs.continuous-integration.outputs.tag}}.zip/g" ./terraform/variables.tf
+          sed -i "s/api.zip/api-v${{needs.continuous-integration.outputs.tag}}.zip/g" .github/terraform/variables.tf
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
@@ -133,21 +135,21 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: terraform
+        working-directory: .github/terraform
 
       - name: Terraform Validate
         run: terraform validate -no-color
-        working-directory: terraform
+        working-directory: .github/terraform
 
       - name: Terraform Plan
         run: terraform plan -no-color
         continue-on-error: true
-        working-directory: terraform
+        working-directory: .github/terraform
 
       - name: Terraform Apply && Deploy Lambda
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
-        working-directory: terraform
+        working-directory: .github/terraform
 
       - name: Clean repo
         run: git clean -f
