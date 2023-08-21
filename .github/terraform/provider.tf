@@ -7,7 +7,7 @@ terraform {
   backend "s3" {
     bucket         = "proj-tfstate"
     key            = "test-lambda/terraform.tfstate"
-    region         = "us-west-2"
+    region         = "eu-west-1"
     dynamodb_table = "terraform"
   }
 }
