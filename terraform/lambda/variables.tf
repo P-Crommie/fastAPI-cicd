@@ -7,7 +7,7 @@ variable "lambda_name" {
 }
 
 variable "s3bucket" {
-  default = "crommie-s3"
+  default = "fast-api-lambda-bucket"
 }
 
 variable "lambda_handler" {

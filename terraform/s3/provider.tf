@@ -6,18 +6,18 @@ terraform {
   }
   backend "s3" {
     bucket         = "proj-tfstate"
-    key            = "test-lambda/terraform.tfstate"
+    key            = "s3bucket/terraform.tfstate"
     region         = "eu-west-1"
     dynamodb_table = "terraform"
   }
 }
 
 provider "aws" {
-  region = "us-west-2"
+  region  = "eu-west-1"
   default_tags {
     tags = {
       owner     = "crommie"
-      project   = "lambda-s3"
+      project   = "fastapi"
       terraform = "true"
       env       = "dev"
     }
